@@ -117,8 +117,7 @@ class MainActivity : AppCompatActivity() {
             binding.bottomSheet.txtGnssStatus.append(it.toString())
             val posSolution =
                 TrackingLocationService.mPseudorangePositionVelocityFromRealTimeEvents.positionSolutionLatLngDeg
-            Toast.makeText(this, "WLS = " + "${posSolution[0]} - ${posSolution[1]}" + " length Data GNSS "+ it.toString().length, Toast.LENGTH_SHORT).show()
-
+            Toast.makeText(this, "${posSolution[0]} - ${posSolution[1]}", Toast.LENGTH_SHORT).show()
         })
     }
 

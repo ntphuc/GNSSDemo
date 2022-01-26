@@ -23,6 +23,7 @@ import com.example.foregroundlocationsample.utils.NotificationUtil.createNotific
 import com.example.foregroundlocationsample.utils.NotificationUtil.createNotificationChannel
 import com.example.foregroundlocationsample.utils.PermissionUtil
 import com.example.foregroundlocationsample.utils.Util
+import com.example.foregroundlocationsample.utils.WriteXML
 import com.google.android.gms.location.*
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.maps.model.LatLng
@@ -66,20 +67,25 @@ class TrackingLocationService : LifecycleService() {
     val rawGnssCallback = object: GnssMeasurementsEvent.Callback() {
         override fun onGnssMeasurementsReceived(eventArgs: GnssMeasurementsEvent?) {
             rawGnssData = RawGnssData(eventArgs)
+            if (!isWritedToObject) {
+                rawGNSSList.add(RawGnssData(eventArgs))
+                Log.d("hieu", "add raw measurement to list")
+            }
             val r = Runnable {
                 mPseudorangePositionVelocityFromRealTimeEvents
                     .computePositionVelocitySolutionsFromRawMeas(eventArgs)
-                rawGNSSList.add(RawGnssData(eventArgs))
             }
             val posSolution =
                 TrackingLocationService.mPseudorangePositionVelocityFromRealTimeEvents.positionSolutionLatLngDeg
             if (posSolution[0].isNaN()) {
                 mHandler.post(r)
-                Log.d("hieu", "onGnssMeasurementsReceived: ${rawGNSSList.size}")
-            } else if (!isWritedToObject) {
-                isWritedToObject = true
-                Util.writeObjectToFile(rawGNSSList, this@TrackingLocationService)
+                //Log.d("hieu", "onGnssMeasurementsReceived: ${rawGNSSList.size}")
             }
+//            else if (!isWritedToObject) {
+//                isWritedToObject = true
+//                //Util.writeObjectToFile(rawGNSSList, this@TrackingLocationService)
+//                WriteXML.createGnssXML(rawGNSSList, this@TrackingLocationService)
+//            }
         }
 
     }
@@ -89,13 +95,6 @@ class TrackingLocationService : LifecycleService() {
             mPseudorangePositionVelocityFromRealTimeEvents.parseHwNavigationMessageUpdates(event)
         }
     }
-
-    val nmeaMessageListener = object : OnNmeaMessageListener {
-        override fun onNmeaMessage(message: String?, timestamp: Long) {
-            Log.d("phuc", "onNmeaMessage: $message")
-        }
-    }
-
 
     val locationCallback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult) {
@@ -119,6 +118,19 @@ class TrackingLocationService : LifecycleService() {
             }
             rawGnssData?.let {
                 currentRawGnssData.postValue(it)
+            }
+        }
+    }
+
+    val nmeaMessageListener = object : OnNmeaMessageListener {
+        override fun onNmeaMessage(message: String?, timestamp: Long) {
+            if (message != null && message.contains("GGA", true) && !isWritedToObject) {
+                val parts = message.split(",");
+                if (parts[2].isNotEmpty() && parts[3].isNotEmpty() && parts[4].isNotEmpty() && parts[5].isNotEmpty()) {
+                    isWritedToObject = true
+                    WriteXML.createGnssXML(rawGNSSList, this@TrackingLocationService)
+                    Log.d("hieu", "onNmeaMessage: $parts")
+                }
             }
         }
     }
@@ -187,6 +199,10 @@ class TrackingLocationService : LifecycleService() {
                 locationManager.registerGnssMeasurementsCallback(rawGnssCallback, Handler(Looper.getMainLooper()))
                 locationManager.registerGnssNavigationMessageCallback(navigationMessageCallback, Handler(Looper.getMainLooper()))
                 locationManager.addNmeaListener(nmeaMessageListener, Handler(Looper.getMainLooper()))
+
+                if (rawGNSSList.size > 0) {
+                    rawGNSSList.clear()
+                }
             }
         } else {
             // unregister location update callback
