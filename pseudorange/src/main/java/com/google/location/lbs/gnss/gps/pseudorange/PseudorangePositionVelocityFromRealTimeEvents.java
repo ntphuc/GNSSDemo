@@ -134,17 +134,19 @@ public class PseudorangePositionVelocityFromRealTimeEvents {
         if (receivedGPSTowNs > mLargestTowNs) {
           mLargestTowNs = receivedGPSTowNs;
         }
-        mUsefulSatellitesToTowNs[measurement.getSvid() - 1] = receivedGPSTowNs;
-        GpsMeasurement gpsReceiverMeasurement =
-            new GpsMeasurement(
-                (long) mArrivalTimeSinceGPSWeekNs,
-                measurement.getAccumulatedDeltaRangeMeters(),
-                measurement.getAccumulatedDeltaRangeState() == VALID_ACCUMULATED_DELTA_RANGE_STATE,
-                measurement.getPseudorangeRateMetersPerSecond(),
-                measurement.getCn0DbHz(),
-                measurement.getAccumulatedDeltaRangeUncertaintyMeters(),
-                measurement.getPseudorangeRateUncertaintyMetersPerSecond());
-        mUsefulSatellitesToReceiverMeasurements[measurement.getSvid() - 1] = gpsReceiverMeasurement;
+        if (measurement.getSvid() > 1) {
+          mUsefulSatellitesToTowNs[measurement.getSvid() - 1] = receivedGPSTowNs;
+          GpsMeasurement gpsReceiverMeasurement =
+                  new GpsMeasurement(
+                          (long) mArrivalTimeSinceGPSWeekNs,
+                          measurement.getAccumulatedDeltaRangeMeters(),
+                          measurement.getAccumulatedDeltaRangeState() == VALID_ACCUMULATED_DELTA_RANGE_STATE,
+                          measurement.getPseudorangeRateMetersPerSecond(),
+                          measurement.getCn0DbHz(),
+                          measurement.getAccumulatedDeltaRangeUncertaintyMeters(),
+                          measurement.getPseudorangeRateUncertaintyMetersPerSecond());
+          mUsefulSatellitesToReceiverMeasurements[measurement.getSvid() - 1] = gpsReceiverMeasurement;
+        }
       }
     }
 

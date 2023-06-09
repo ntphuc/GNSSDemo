@@ -23,6 +23,7 @@ import com.example.foregroundlocationsample.utils.NotificationUtil.createNotific
 import com.example.foregroundlocationsample.utils.NotificationUtil.createNotificationChannel
 import com.example.foregroundlocationsample.utils.PermissionUtil
 import com.example.foregroundlocationsample.utils.Util
+import com.example.foregroundlocationsample.utils.Util.is4GpsSatellite
 import com.example.foregroundlocationsample.utils.WriteXML
 import com.google.android.gms.location.*
 import com.google.android.gms.location.LocationRequest
@@ -36,6 +37,7 @@ typealias Polyline = MutableList<LatLng>
 typealias Polylines = MutableList<Polyline>
 
 class TrackingLocationService : LifecycleService() {
+
     companion object {
         val isTracking = MutableLiveData<Boolean>()
         val pathPoints = MutableLiveData<Polylines>()
@@ -58,28 +60,49 @@ class TrackingLocationService : LifecycleService() {
     var gnssStatus : GnssStatus? = null
     var rawGnssData: RawGnssData? = null
 
+    var tempRawGnss: GnssMeasurementsEvent? = null
+
+    var milliseconds = System.currentTimeMillis();
+
     val gnssCallback = object : GnssStatus.Callback() {
         override fun onSatelliteStatusChanged(status: GnssStatus) {
             gnssStatus = status
+            Log.e("phuc", "onSatelliteStatusChanged " );
         }
     }
 
     val rawGnssCallback = object: GnssMeasurementsEvent.Callback() {
         override fun onGnssMeasurementsReceived(eventArgs: GnssMeasurementsEvent?) {
+            Log.e("phuc", "onGnssMeasurementsReceived "+ ((System.currentTimeMillis() - milliseconds)/1000));
+            milliseconds = System.currentTimeMillis();
             rawGnssData = RawGnssData(eventArgs)
+
             if (!isWritedToObject) {
                 rawGNSSList.add(RawGnssData(eventArgs))
-                Log.d("hieu", "add raw measurement to list")
+                Log.d("phuc", "add raw measurement to list")
             }
-            val r = Runnable {
-                mPseudorangePositionVelocityFromRealTimeEvents
-                    .computePositionVelocitySolutionsFromRawMeas(eventArgs)
+
+            if (is4GpsSatellite(eventArgs) && tempRawGnss == null) {
+                tempRawGnss = eventArgs
+
             }
-            val posSolution =
-                TrackingLocationService.mPseudorangePositionVelocityFromRealTimeEvents.positionSolutionLatLngDeg
-            if (posSolution[0].isNaN()) {
+
+            if (eventArgs != null) {
+                for (measurement in eventArgs.measurements) {
+                    if (measurement.constellationType == GnssStatus.CONSTELLATION_GPS) {
+                        Log.e("phuc", " measurement = "+ measurement.svid);
+
+                    }
+                }
+            }
+
+
+            if (tempRawGnss != null) {
+                val r = Runnable {
+                    mPseudorangePositionVelocityFromRealTimeEvents
+                        .computePositionVelocitySolutionsFromRawMeas(tempRawGnss)
+                }
                 mHandler.post(r)
-                //Log.d("hieu", "onGnssMeasurementsReceived: ${rawGNSSList.size}")
             }
 //            else if (!isWritedToObject) {
 //                isWritedToObject = true
@@ -129,7 +152,7 @@ class TrackingLocationService : LifecycleService() {
                 if (parts[2].isNotEmpty() && parts[3].isNotEmpty() && parts[4].isNotEmpty() && parts[5].isNotEmpty()) {
                     isWritedToObject = true
                     WriteXML.createGnssXML(rawGNSSList, this@TrackingLocationService)
-                    Log.d("hieu", "onNmeaMessage: $parts")
+                    Log.d("phuc", "onNmeaMessage: $parts")
                 }
             }
         }

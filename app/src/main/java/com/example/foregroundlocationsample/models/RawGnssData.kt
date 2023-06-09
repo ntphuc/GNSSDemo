@@ -37,24 +37,25 @@ class RawGnssData(event: GnssMeasurementsEvent?) {
 
         return "\nRAW MEASUREMENTS: " +
                 "\n :: svid: ${measurement.svid}" +
-                "\n :: timeOffsetNanos: ${measurement.timeOffsetNanos}" +
-                "\n :: state: ${measurement.state}" +
-                "\n :: receivedSvTimeNanos: ${measurement.receivedSvTimeNanos}" +
-                "\n :: receivedSvTimeUncertaintyNanos: ${measurement.receivedSvTimeUncertaintyNanos}" +
-                "\n :: cn0DbHz: ${measurement.cn0DbHz}" +
-                "\n :: pseudorangeRateMetersPerSecond: ${measurement.pseudorangeRateMetersPerSecond}" +
-                "\n :: pseudorangeRateUncertaintyMetersPerSecond: ${measurement.pseudorangeRateUncertaintyMetersPerSecond}" +
-                "\n :: accumulatedDeltaRangeState: ${measurement.accumulatedDeltaRangeState}" +
-                "\n :: accumulatedDeltaRangeMeters: ${measurement.accumulatedDeltaRangeMeters}" +
-                "\n :: accumulatedDeltaRangeUncertaintyMeters: ${measurement.accumulatedDeltaRangeUncertaintyMeters}" +
-                "\n :: carrierFrequencyHz: $carrierFrequencyHz" +
-                "\n :: carrierCycles: $carrierCycles" +
-                "\n :: carrierPhase: $carrierPhase" +
-                "\n :: carrierPhaseUncertainty: $carrierPhaseUncertainty" +
-                "\n :: multipathIndicator: ${measurement.multipathIndicator}" +
-                "\n :: snrInDb: $snrInDb" +
-                "\n :: constellationType: ${measurement.constellationType}" +
-                "\n :: automaticGainControlLevelDb: $automaticGainControlLevelDb\n"
+                "\n :: constellationType: ${measurement.constellationType}" ;
+//                "\n :: timeOffsetNanos: ${measurement.timeOffsetNanos}" +
+//                "\n :: state: ${measurement.state}" +
+//                "\n :: receivedSvTimeNanos: ${measurement.receivedSvTimeNanos}" +
+//                "\n :: receivedSvTimeUncertaintyNanos: ${measurement.receivedSvTimeUncertaintyNanos}" +
+//                "\n :: cn0DbHz: ${measurement.cn0DbHz}" +
+//                "\n :: pseudorangeRateMetersPerSecond: ${measurement.pseudorangeRateMetersPerSecond}" +
+//                "\n :: pseudorangeRateUncertaintyMetersPerSecond: ${measurement.pseudorangeRateUncertaintyMetersPerSecond}" +
+//                "\n :: accumulatedDeltaRangeState: ${measurement.accumulatedDeltaRangeState}" +
+//                "\n :: accumulatedDeltaRangeMeters: ${measurement.accumulatedDeltaRangeMeters}" +
+//                "\n :: accumulatedDeltaRangeUncertaintyMeters: ${measurement.accumulatedDeltaRangeUncertaintyMeters}" +
+//                "\n :: carrierFrequencyHz: $carrierFrequencyHz" +
+//                "\n :: carrierCycles: $carrierCycles" +
+//                "\n :: carrierPhase: $carrierPhase" +
+//                "\n :: carrierPhaseUncertainty: $carrierPhaseUncertainty" +
+//                "\n :: multipathIndicator: ${measurement.multipathIndicator}" +
+//                "\n :: snrInDb: $snrInDb" +
+//                "\n :: constellationType: ${measurement.constellationType}" +
+//                "\n :: automaticGainControlLevelDb: $automaticGainControlLevelDb\n"
     }
 
     private fun getClockDataStr(): String {
